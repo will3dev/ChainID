@@ -1,0 +1,203 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row" style="padding: 25px;">
+        <div class="col-md-3 justify-content-start">
+            <div class="row">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        Data Request Activity
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-muted">Pending
+                            <span class="badge badge-pill badge-info">{{ request_activity["pending"] }}</span>
+                        </li>
+                        <li class="list-group-item text-muted">Complete
+                            <span class="badge badge-pill badge-info">{{ request_activity["approved"] }}</span>
+                        </li>
+                        <li class="list-group-item text-muted">Fee's paid
+                            <span class="badge badge-pill badge-info">{{ request_activity["expense"] }} <i class="fab fa-ethereum"></i></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            {% if user_data %}
+            <div class="row justify-content-center align-items-center">
+                <div class="card shadow-sm" style="width: 80%">
+                    <div class="card-header">
+                        <h3>Requested Data</h3>
+                        <div class="row">
+                            <div class="col-6">
+                                <h5 class="text-muted text-truncate">
+                                    {{ wallet_data['wallet'] }}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <h5>Name: </h5>
+                                <p>{{ user_data.get('name') }}</p>
+                            </div>
+                            <div class="col-4">
+                                <h5>Phone:</h5>
+                                <p>{{ user_data.get('phone') }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Tax ID:</h5>
+                                <p>{{ user_data.get('tin') }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h5>Address</h5>
+                                <p>{{ user_data.get('home') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr style="width: 75%">
+            {% endif %}
+
+
+
+
+            <div class="row justify-content-center align-items-center">
+                <div class="card shadow-sm" style="width: 80%">
+                    <h3 class="card-header">Your Active Requests</h3>
+                    <div class="overflow-auto" style="max-height: 500px;">
+                        <div class="container">
+                            {% for request in requests %}
+                                {% if request["active"] %}
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    <h5 class="card-title text-truncate" data-toggle="popover" title="Wallet Address" data-placement="top" data-content="{{ request['wallet'] }}">
+                                                        <i class="fas fa-angle-double-right"></i>{{ request['wallet'] }}
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-9">
+                                                    <div class="row justify-content-md-start">
+                                                        <div class="col-4">
+                                                            {% if request['approved'] %}
+                                                                <h6 class="card-subtitle mb-2" data-toggle="popover" title="Status" data-placement="top" data-content="Request has been approved.">
+                                                                    <i class="fas fa-toggle-on"></i>
+                                                                </h6>
+                                                            {% else %}
+                                                                <h6 class="card-subtitle mb-2" data-toggle="popover" title="Status" data-placement="top" data-content="Request is pending.">
+                                                                    <i class="fas fa-toggle-off"></i>
+                                                                </h6>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <p class="card-text text-muted text-truncate" data-toggle="popover" title="Request Detail" data-placement="top" data-content="{{ request['description'] }}">{{ request['description'] }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3 justify-content-center">
+                                                    {% if request['approved'] %}
+                                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dataModal{{ request['wallet'] }}">
+                                                            Get Data
+                                                        </button>
+                                                    {% else %}
+                                                        <a role="button" class="btn btn-primary disabled" href="#" aria-disabled="True">Get Data</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal fade" id="dataModal{{ request['wallet'] }}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="dataModal{{ request['wallet'] }}Label" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="dataModal{{ request['wallet'] }}Label">Get Wallet Data</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <form name="{{ request['wallet'] }}" method="POST" action="">
+                                                    {{ request['form'].hidden_tag() }}
+                                                    <fieldset class="form-group">
+                                                        <div class="modal-body">
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        {{ request['form'].wallet.label(class="form-control-label", for="wallet" ) }}
+
+                                                                        {% if request['form'].wallet.errors %}
+                                                                        {{ request['form'].wallet(class="form-control form-control-lg is-invalid") }}
+                                                                        <div class="invalid-feedback">
+                                                                            {% for error in request['form'].wallet.errors %}
+                                                                                <span>{{ error }}</span>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                        {% else %}
+                                                                            {{ request['form'].wallet(class="form-control form-control-lg", for="wallet") }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="form-group">
+                                                                        {{ request['form'].requester.label(class="form-control-label", for="password1" ) }}
+
+                                                                        {% if request['form'].requester.errors %}
+                                                                        {{ request['form'].requester(class="form-control form-control-lg is-invalid") }}
+                                                                        <div class="invalid-feedback">
+                                                                            {% for error in request['form'].requester.errors %}
+                                                                                <span>{{ error }}</span>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                        {% else %}
+                                                                            {{ request['form'].requester(class="form-control form-control-lg", for="password1") }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <div class="form-group">
+                                                                        {{ request['form'].password.label(class="form-control-label", for="password1" ) }}
+
+                                                                        {% if request['form'].password.errors %}
+                                                                        {{ request['form'].password(class="form-control form-control-lg is-invalid") }}
+                                                                        <div class="invalid-feedback">
+                                                                            {% for error in request['form'].password.errors %}
+                                                                                <span>{{ error }}</span>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                        {% else %}
+                                                                            {{ request['form'].password(class="form-control form-control-lg", for="password1") }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" href="#" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

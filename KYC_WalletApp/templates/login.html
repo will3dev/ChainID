@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 class="display-5" style="padding:50px">Welcome to ChainID</h1>
+<div class="row justify-content-center align-items-center">
+    <div class="col-10 col-md-8 col-lg-6">
+        <div class="card shadow p-3 mb-5 bg-white rounded" style="background-color:#383838;">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <h3 class="card-title">Login</h3>
+                        <div class="card-body">
+                            <div class="form-group">
+                            {{ form.email.label(class="form-control-label", for="login1") }}
+
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="form-control form-control-lg", for="login1") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.password.label(class="form-control-label", for="login2") }}
+
+                            {% if form.password.errors %}
+                                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.password(class="form-control form-control-lg", for="login2") }}
+                            {% endif %}
+                        </div>
+                        <br/>
+                        <div class="form-group">
+                            {{ form.login(class="btn btn-primary") }}
+                        </div>
+                        <small class="text-muted">
+                                Need an account? <a href="{{ url_for('users.register') }}"> Register here.</a>
+                        </small>
+                        </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

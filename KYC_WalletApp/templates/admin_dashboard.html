@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="row justify-content-center" style="padding-top:25px; padding-bottom:10px;">
+  {{chart|safe}}
+</div>
+
+<div class="row justify-content-center" style="padding-top:10px; padding-bottom:25px;">
+  <div class="container" style="width: 60%">
+     <table class="table table-striped" style="width: 100%">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Activity
+          <th scope="col">User ID</th>
+          <th scope="col">Date/Time</th>
+          <th scope="col">Status</th>
+          <th scope="col">Source</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="overflow-auto" style="max-height: 400px;">
+    <div class="container">
+      <table class="table table-striped" style="width: 100%">
+        <tbody>
+            {% for activity in log %}
+              <tr>
+                <th scope="row">{{ activity.id }}</th>
+                <td>{{ activity.request_name }}</td>
+                <td>{{ activity.user_id }}</td>
+                <td>{{ activity.create_datetime }}</td>
+                <td>{{ activity.status }}</td>
+                <td>{{ activity.channel }}</td>
+              </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

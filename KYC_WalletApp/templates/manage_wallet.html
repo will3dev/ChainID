@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row" style="padding:25px">
+        <div class="col-md-3 justify-content-start">
+            <div class="row">
+                <div class="card shadow-sm">
+                    <h6 class="card-header">
+                        Wallet Activity
+                    </h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-muted">Pending
+                            <span class="badge badge-pill badge-info">{{ wallet_data["active_requests_count"] }}</span>
+                        </li>
+                        <li class="list-group-item text-muted">Complete
+                            <span class="badge badge-pill badge-info">{{ wallet_data["approved_requests_count"] }}</span>
+                        </li>
+                        <li class="list-group-item text-muted">Data Request Fee
+                            <span class="badge badge-pill badge-info">{{ wallet_data["service_cost"] }} <i class="fab fa-ethereum"></i></span>
+                        </li>
+                        <li class="list-group-item text-muted">Fee Income
+                            <span class="badge badge-pill badge-info">{{ wallet_data["earnings"] }} <i class="fab fa-ethereum"></i></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="row justify-content-center align-items-center">
+                <div class="card shadow-sm" style="width: 80%">
+                    <h3 class="card-header">Data Requests</h3>
+                    <div class="overflow-auto" style="max-height: 500px;">
+                        <div class="container">
+                            {% for request in requests %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <h5 class="card-title text-truncate" data-toggle="popover" title="Originator" data-placement="top" data-content="{{ request['requester'] }}">
+                                                    <i class="fas fa-angle-double-right"></i>
+                                                    Originator of Request: {{ request['requester'] }}
+                                                </h5>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <div class="row justify-content-md-start">
+                                                    <div class="col-4">
+                                                        <h6 class="card-subtitle mb-2 text-muted">{{ request['name'] }}</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="row justify-content-md-start">
+                                                    <div class="col-8">
+                                                        <p class="card-text text-truncate" data-toggle="popover" title="Request Detail" data-placement="top" data-content="{{ request['description'] }}">{{ request['description'] }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3 justify-content-center" >
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#approveModal{{ request['requester'] }}">
+                                                    Approve
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="approveModal{{ request['requester'] }}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="approveModal{{ request['requester'] }}Label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="approveModal{{ request['requester'] }}Label">Approve Request</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                  <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <form name="{{ request['requester'] }}" method="POST" action="">
+                                                {{ request['form'].hidden_tag() }}
+                                                <fieldset class="form-group">
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            {{ request['form'].requester.label(class="form-control-label", for="password1" ) }}
+
+                                                            {% if request['form'].requester.errors %}
+                                                            {{ request['form'].requester(class="form-control form-control-lg is-invalid") }}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in request['form'].requester.errors %}
+                                                                    <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% else %}
+                                                                {{ request['form'].requester(class="form-control form-control-lg", for="password1") }}
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{ request['form'].password.label(class="form-control-label", for="password1" ) }}
+
+                                                            {% if request['form'].password.errors %}
+                                                            {{ request['form'].password(class="form-control form-control-lg is-invalid") }}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in request['form'].password.errors %}
+                                                                    <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% else %}
+                                                                {{ request['form'].password(class="form-control form-control-lg", for="password1") }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" href="{{ url_for('wallets.manage_wallet') }}" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                    </div>
+                                                </fieldset>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

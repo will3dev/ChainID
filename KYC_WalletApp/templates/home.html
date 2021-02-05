@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">Secure Your Data</h1>
+    <p class="lead">
+        Built on the Rinkeby Ethereum test network, you can cryptographically keep your information secure.
+        Create an identity wallet where you store your personal details. Institutions requiring your information
+        can make a request of which you control the approval. All the transactions are immutable and secure.
+    </p>
+  </div>
+</div>
+
+<div class="container" style="padding-top: 10px;">
+    <div class="row" style="margin-top: 15px; margin-bottom: 10px; margin-left: 5px; margin-right 5px;">
+        <div class="col-md-3">
+            <div class="d-flex justify-content-center">
+                <div class="card rounded-circle shadow-sm" style="width: 90px; height: 90px;">
+                    <div class="card-body">
+                        <i class="fas fa-cash-register fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center">
+                <p class="text-muted">Create Wallet Fee</p>
+            </div>
+            <div class="d-flex justify-content-center">
+                <h5><span class="badge badge-pill badge-info">{{ data["createFee"] }} <i class="fab fa-ethereum"></i></span></h5>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="container">
+                <div class="d-flex justify-content-center">
+                    <div class="card rounded-circle shadow-sm" style="width: 90px; height: 90px">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <p class="text-muted">Processed Requests</p>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <h5><span class="badge badge-pill badge-info">{{ data["process_requests"] }}</span></h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="container">
+                <div class="d-flex justify-content-center">
+                    <div class="card rounded-circle shadow-sm" style="width: 90px; height: 90px">
+                        <div class="card-body">
+                            <i class="far fa-id-card fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <p class="text-muted">Active Wallets</p>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <h5><span class="badge badge-pill badge-info">{{ data["wallets"] }}</span></h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="container">
+                <div class="d-flex justify-content-center">
+                    <div class="card rounded-circle shadow-sm" style="width: 90px; height: 90px">
+                        <div class="card-body">
+                            <i class="fas fa-sync-alt fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <p class="text-muted">Pending Requests</p>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <h5><span class="badge badge-pill badge-info">{{ data["pending_requests"] }}</span></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<hr style="width: 75%">
+
+<div class="container">
+    <div class="row justify-content-center" style="padding:30px;">
+        <div class="card shadow-sm" style="width: 60%;">
+            <h3 class="card-header">Deployed Wallets</h3>
+            <div class="overflow-auto" style="max-height: 500px;">
+                <div class="container">
+                    {% for wallet in wallets %}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-angle-double-right"></i>
+                                    {{ wallet }}
+                                </h5>
+                                <a href="{{ url_for('wallets.request_data', address=wallet) }}" class="btn btn-primary">Request Data</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
