@@ -13,7 +13,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     account_address = db.Column(db.String(60), nullable=False)
     keystore = db.Column(db.Text, nullable=False)
-    is_admin = db.Column(db.Integer, nullable=False, default=0)
+    is_admin = db.Column(db.Integer, nullable=False, default=1)
 
     def __repr__(self):
         return f"<USER: {self.username}; {self.email}; {self.account_address}>"
