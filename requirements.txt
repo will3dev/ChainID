@@ -18,6 +18,7 @@ Flask-Bcrypt
 Flask-RESTful
 Flask-Mail
 Flask-Login
+Flask-WTF
 web3
 Flask-JWT
 numpy
