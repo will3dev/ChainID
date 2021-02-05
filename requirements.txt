@@ -16,6 +16,8 @@ virtualenv-clone==0.5.4
 Werkzeug==1.0.1
 Flask-Bcrypt
 Flask-RESTful
+Flask-Mail
+Flask-Login
 web3
 Flask-JWT
 numpy
