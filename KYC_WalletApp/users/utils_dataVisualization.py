@@ -58,7 +58,7 @@ def generate_plt():
 
     # append datetime objects to dates object
     # starting with date from 30 days ago through today
-    for x in range(day_range, 1, -1):
+    for x in range(day_range-1, 0, -1):
         date = today - datetime.timedelta(days=x)
         dates.append(date)
 
@@ -103,10 +103,6 @@ def generate_plt():
     for date in data.keys():
         api_data.append(data[date]['api'])
         web_data.append(data[date]['web'])
-
-    print(web_data)
-    print(api_data)
-    print(len(dates))
 
 
     y = max([max(web_data), max(api_data)])
