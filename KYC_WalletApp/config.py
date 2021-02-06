@@ -1,12 +1,12 @@
 import os
 
 class Config:
-    SECRET_KEY = "KChofa1233!"
-    SQLALCHEMY_DATABASE_URI = "sqlite:///site.db"
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = "True"
-    MAIL_SERVER = 'mail.privateemail.com'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = 'general@will3dev.com'
-    MAIL_PASSWORD = "KChofa1233!"
-    MAIL_DEFAULT_SENDER = 'general@will3dev.com'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
