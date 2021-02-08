@@ -111,7 +111,6 @@ def create_wallet():
 
             wallet_create = createKYCWallet(
                 account=account,
-                factory=factory,
                 name=form.name.data,
                 home=address,
                 tin=form.tin.data,
