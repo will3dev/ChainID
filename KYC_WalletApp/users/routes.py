@@ -5,6 +5,7 @@ from KYC_WalletApp import flask_bcrypt
 from KYC_WalletApp.mail_utilities.utils import welcomeEmail
 from KYC_WalletApp.users.forms import RegistrationForm, LoginForm, TransferForm
 from KYC_WalletApp.models.utils import *
+from KYC_WalletApp.models.models import User as Users
 from KYC_WalletApp.wallets.utils import getAccount
 from KYC_WalletApp.users.utils import *
 from KYC_WalletApp.users.utils_dataVisualization import *
@@ -57,14 +58,16 @@ def register():
         # take the encrypted keystore and convert it
         # to be saved in the DB
         keystore = json.dumps(account.get("keystore"))
-        # create the new user
-        user = User(
+        # create the new user object and add to DB
+        user = Users(
             username=form.username.data,
             email=form.email.data,
             password=hashed_password,
             account_address=account.get('address'),
             keystore=keystore
         )
+        db.session.add(user)
+        db.session.commit()
         # send welcome email
         welcomeEmail(user)
         log_activity_successWeb(user=user, request_name="create_user")
