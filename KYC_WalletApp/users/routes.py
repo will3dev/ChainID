@@ -1,11 +1,8 @@
-import base64
-from io import BytesIO
-from matplotlib.figure import Figure
-
 from flask import (flash, redirect, url_for,
                    render_template, Blueprint)
 from flask_login import login_user, current_user, login_required, logout_user
 from KYC_WalletApp import flask_bcrypt
+from KYC_WalletApp.mail_utilities.utils import welcomeEmail
 from KYC_WalletApp.users.forms import RegistrationForm, LoginForm, TransferForm
 from KYC_WalletApp.models.utils import *
 from KYC_WalletApp.wallets.utils import getAccount
@@ -55,8 +52,12 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = flask_bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        # create a keystore with the new users account
         account = create_account(form.password.data)
+        # take the encrypted keystore and convert it
+        # to be saved in the DB
         keystore = json.dumps(account.get("keystore"))
+        # create the new user
         user = User(
             username=form.username.data,
             email=form.email.data,
@@ -64,7 +65,8 @@ def register():
             account_address=account.get('address'),
             keystore=keystore
         )
-
+        # send welcome email
+        welcomeEmail(user)
         log_activity_successWeb(user=user, request_name="create_user")
 
         flash(f"Your account has been created!", "primary")

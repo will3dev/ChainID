@@ -2,7 +2,7 @@ from flask import (flash, request, redirect, url_for,
                    render_template, Blueprint)
 from flask_login import login_required, current_user
 from KYC_WalletApp import flask_bcrypt
-from KYC_WalletApp.models.models import User
+from KYC_WalletApp.mail_utilities.utils import *
 from KYC_WalletApp.models.utils import *
 from KYC_WalletApp.wallets.forms import RequestDataForm, CreateWalletForm
 from KYC_WalletApp.wallets.utils import *
@@ -60,6 +60,7 @@ def manage_wallet():
     address = factory.functions.walletOwners(current_user.account_address).call()
     # if wallet address does not exist
     # contract returns "0x0000000000000000000000000000000000000000"
+    # redirect to have user create a wallet
     if address == "0x0000000000000000000000000000000000000000":
         return redirect(url_for("wallets.create_wallet"))
 
@@ -71,20 +72,26 @@ def manage_wallet():
     if request.form:
         if "requester" in request.form:
 
+            # get POST request objects
             form = requests[0]['form']
             if form.validate_on_submit():
-
                 if form.validate_on_submit():
                     account = getAccount(current_user, form.password.data)
 
-                    if approveRequest(account=account, requester=form.requester.data, address=address):
+                    approval = approveRequest(account=account, requester=form.requester.data, address=address)
+                    # check to see if teh approval was successful
+                    if approval == 1:
                         log_activity_successWeb(user=current_user, request_name="manage_wallet_approve")
+
+                        # alert the requester that the request has been approved
+                        requestApprovedAlert(recipient_account=form.requester.data, wallet_address=address)
                         flash(f"Request from {form.requester.data} approved.", "success")
                         return redirect(url_for("wallets.manage_wallet"))
 
+                    # on failure flash solidity error message
                     else:
                         log_activity_failureWeb(user=current_user, request_name="manage_wallet_approve")
-                        flash(f"Request from {form.requester.data} approval failure.", "danger")
+                        flash(f"Request from {form.requester.data} approval failure.\n{approval}", "danger")
 
     return render_template("manage_wallet.html", requests=requests, address=address, wallet_data=wallet_data)
 
@@ -99,25 +106,29 @@ def create_wallet():
 
         if flask_bcrypt.check_password_hash(user.password, form.password.data):
             account = getAccount(user, form.password.data)
+            # compound the address to one line
             address = form.street.data + ', ' + form.city.data + ', ' + form.state.data
-            if createKYCWallet(
+
+            wallet_create = createKYCWallet(
                 account=account,
                 factory=factory,
                 name=form.name.data,
                 home=address,
                 tin=form.tin.data,
                 phone=form.phone.data
-            ):
+            )
+            # if create wallet was a success
+            if wallet_create == 1:
                 wallet_address = factory.functions.walletOwners(user.account_address).call()
-
                 log_activity_successWeb(user=current_user, request_name="create_wallet")
-
+                walletCreatedAlert(recipient=current_user, wallet_address=wallet_address)
                 flash(f"New wallet created at {wallet_address}.", "success")
                 return redirect(url_for("wallets.manage_wallet"))
 
+            # wallet create fails flash the solidity error message
             else:
                 log_activity_failureWeb(user=current_user, request_name="create_wallet")
-                flash("Creation of wallet failed.", "danger")
+                flash(f"Creation of wallet failed. {wallet_create}", "danger")
 
         else:
             log_activity_failureWeb(user=current_user, request_name="create_wallet")
@@ -130,9 +141,9 @@ def create_wallet():
 def request_data(address):
     form = RequestDataForm()
     wallet = wc.Wallet(address)
-    fee = w3.fromWei(wallet.functions.serviceCost().call(), 'ether')
-    manager = wallet.functions.manager().call()
-    owner = wallet.functions.owner().call()
+    # unpack the required values for the route
+    manager, owner, fee, *_discard = wallet.functions.getWalletDetails().call()
+    fee = w3.fromWei(fee, 'ether')
 
     if form.validate_on_submit():
         user = User.query.filter_by(username=current_user.username).first()
@@ -148,19 +159,25 @@ def request_data(address):
                 return redirect(url_for("main.home"))
 
             # otherwise make a new request
-            elif requestData(
-                account=account,
-                wallet=wc.Wallet(address),
-                requester_name=form.requester.data,
-                request_desc=form.request_reason.data
-            ):
-                log_activity_successWeb(user=current_user, request_name="request_wallet_data")
-                flash(f"Request for data sent to {address}.", "success")
-                return redirect(url_for("main.home"))
             else:
-                log_activity_failureWeb(user=current_user, request_name="request_wallet_data")
-                flash("Request for data failed.", "danger")
+                wallet_data_request = requestData(
+                    account=account,
+                    wallet=wc.Wallet(address),
+                    requester_name=form.requester.data,
+                    request_desc=form.request_reason.data
+                )
+                # if the request is a success
+                if wallet_data_request == 1:
+                    log_activity_successWeb(user=current_user, request_name="request_wallet_data")
+                    # send email notifying owner of request
+                    newRequestAlert(recipient_account=owner)
+                    flash(f"Request for data sent to {address}.", "success")
+                    return redirect(url_for("main.home"))
 
+                # if the data request fails redirect and flash the Solidity error message
+                else:
+                    log_activity_failureWeb(user=current_user, request_name="request_wallet_data")
+                    flash(f"{wallet_data_request}", "danger")
         else:
             log_activity_failureWeb(user=current_user, request_name="request_wallet_data")
             flash("Password incorrect", "danger")
