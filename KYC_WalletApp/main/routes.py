@@ -12,6 +12,10 @@ main = Blueprint('main', __name__)
 @login_required
 def home():
     wallets = factory.functions.getDeployedWallets().call()
+    # remove unused wallets - will eventually fix
+    wallets.remove('0x662A8010753931832BC5d38e6e42a78D38373ECF')
+    wallets.remove('0x4b884576df9313210105BFDb2647319906949d90')
+
     form = WalletSearchForm()
 
     data = {"process_requests": 0, "pending_requests": 0}
