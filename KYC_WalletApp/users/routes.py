@@ -1,3 +1,4 @@
+import os
 from flask import (flash, redirect, url_for,
                    render_template, Blueprint)
 from flask_login import login_user, current_user, login_required, logout_user
@@ -70,6 +71,16 @@ def register():
         db.session.commit()
         # send welcome email
         welcomeEmail(user)
+        # provide some starting funds 2 ether
+        admin_account = getAccount(
+            User.query.filter_by(email=os.environ.get('ADMIN_EMAIL')).first(),
+            password=os.environ.get('ADMIN_PASSWORD')
+        )
+        transfer_ether(
+            value=2,
+            to_account=user.account_address,
+            from_account=admin_account,
+        )
         log_activity_successWeb(user=user, request_name="create_user")
 
         flash(f"Your account has been created!", "primary")
