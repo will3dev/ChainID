@@ -131,8 +131,9 @@ def profile():
 @users.route("/admin_dashboard", methods=["GET"])
 @login_required
 def admin_dashboard():
-    log = get_userActivityLog()
-    chart = generate_plt()
+    day_range = 30
+    log = get_userActivityLog(day_range)
+    chart = ActivityDashboard(day_range=day_range).generate_plot()
 
 
 

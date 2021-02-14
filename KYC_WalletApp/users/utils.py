@@ -1,7 +1,6 @@
 import re
 import datetime
 from KYC_WalletApp.models.models import User, Activity
-from KYC_WalletApp.users.utils_dataVisualization import day_range
 
 
 # check to see if password is valid format
@@ -34,7 +33,7 @@ def is_pwMatch(pw, confirm_pw):
         return False
 
 
-def get_userActivityLog():
+def get_userActivityLog(day_range):
     dates = list()
     today = datetime.datetime.utcnow()
     for x in range(day_range, 0, -1):
