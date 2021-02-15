@@ -8,6 +8,8 @@ import mpld3
 from KYC_WalletApp.models.models import Activity
 from KYC_WalletApp import db
 
+plt.rcParams['axes.xmargin'] = 0
+plt.rcParams['axes.ymargin'] = 0
 
 class ActivityDashboard:
     def __init__(self, day_range):
