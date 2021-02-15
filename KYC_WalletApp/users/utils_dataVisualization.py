@@ -97,11 +97,33 @@ class ActivityDashboard:
 
         return {'x': final_df.index, 'y_web': final_df['request_name_web'], 'y_api': final_df['request_name_api']}
 
+    def activity_by_request_type(self):
+        df = self.df_condensed
+
+        # separate out the activity for api vs. web
+        data_api = df[df['channel'] == 'api']
+        data_web = df[df['channel'] == 'web']
+
+        # group the data in both the dataframes by request name and get count
+        api = data_api.groupby('request_name').count()['channel']
+        web = data_web.groupby('request_name').count()['channel']
+
+        # merge the two dataframes and fill in the NaN values
+        channel_data = pd.merge(
+            api, web,
+            how='outer',
+            on='request_name',
+            suffixes=('_api', '_web')
+        ).fillna(0)
+
+        return channel_data
+
     def generate_plot(self):
         hours = self.activity_by_hour()
         channel = self.activity_by_channel()
+        request = self.activity_by_request_type()
 
-        fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(9, 6))
+        fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(9, 8))
 
         plt.tight_layout()
 
@@ -111,10 +133,38 @@ class ActivityDashboard:
         ax[0].legend(loc=0)
         plt.setp(ax[0].xaxis.get_majorticklabels(), rotation=30)
 
-        ax[1].bar(hours['x'], hours['y'], color='#20c997')
+        ax[1].plot(hours['x'], hours['y'], lw=3, color='#20c997')
         ax[1].set_xticks(hours['x'])
         ax[1].set_xticklabels(hours['x'])
         ax[1].set_title('Activity Volume by Hour')
+
+        x = np.arange(len(request.index))  # get the xtick positions
+        width = .35  # set the width of the bars
+
+        ax[2].bar(
+            x - width / 2,  # plot the x coordinates position left the amount of the width
+            request['channel_api'],
+            width,  # width of the bar
+            label='API',
+            color='#d63384'
+        )
+
+        ax[2].bar(
+            x + width / 2,  # plot the x coordinates position right the amount of the width
+            request['channel_web'],
+            width,  # width of the bar
+            label='Web',
+            color='#6f42c1'
+        )
+
+        ax[2].set_title('Activity by Request Type')
+        ax[2].set_xlabel('Request Type')
+        ax[2].set_ylabel('Volume of Requests')
+        ax[2].set_xticks(x)  # set where the x ticks will show up
+        ax[2].set_xticklabels(list(request.index), rotation=45)  # set the labels for the xticks
+        ax[2].legend()
+
+        fig.tight_layout()
 
         return mpld3.fig_to_html(fig)
 
